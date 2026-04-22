@@ -49,7 +49,7 @@ export class CertificatesService {
             const fileName = `cert_${participantName.replace(/\s+/g , '_')}-${Date.now()}`;
             const uploadResult = await this.cloudinaryService.uploadCertificate(
                 pdfBuffer,
-                'certificate_templates',
+                'certificate_generates',
                 fileName
             );
 
