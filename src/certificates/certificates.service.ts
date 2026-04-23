@@ -1,18 +1,49 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import axios from 'axios';
-import { createCanvas, loadImage } from 'canvas';
+import { createCanvas, loadImage , registerFont} from 'canvas';
 import { Config } from './dto/config-certificates.dto';
+import * as path from 'path';
+import * as fs from 'fs';
 
 @Injectable()
 export class CertificatesService {
 
 
-    constructor(private readonly cloudinaryService : CloudinaryService){}
+    constructor(private readonly cloudinaryService : CloudinaryService){
+        this.registerFonts();
+    }
 
 
     private getTemplateUrl(templateName : string){
         return `https://res.cloudinary.com/dsjsrazav/image/upload/${templateName}.png`
+    }
+
+    private registerFonts() {
+        const fontsDir = path.join(__dirname, '..', 'fonts');
+
+        if (!fs.existsSync(fontsDir)) {
+            console.warn('Fonts directory not found:', fontsDir);
+            return;
+        }
+
+        const fontFiles = fs.readdirSync(fontsDir).filter(f => f.endsWith('.ttf'));
+
+        for (const file of fontFiles) {
+            // Parse family and weight from filename
+            // e.g. "Roboto-Bold.ttf" → family: "Roboto", weight: "bold"
+            const [family, variantRaw] = file.replace('.ttf', '').split('-');
+            const variant = variantRaw?.toLowerCase() ?? 'regular';
+
+            const weight = variant.includes('bold') ? 'bold' : 'regular';
+            const style = variant.includes('italic') ? 'italic' : 'normal';
+
+            try {
+                registerFont(path.join(fontsDir, file), { family, weight, style });
+            } catch (err) {
+                console.warn(`❌ Failed to register font: ${file}`);
+            }
+        }
     }
 
     async generate(
@@ -36,7 +67,7 @@ export class CertificatesService {
             ctx.drawImage(image, 0, 0 , image.width , image.height);
 
             //configuration
-            ctx.font = `${config.fontSize}px ${config.fontFamily}`;
+            ctx.font = `${config.fontSize}px "${config.fontFamily}"`;
             ctx.fillStyle = config.color;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';

@@ -49,6 +49,7 @@ RUN npx prisma generate
 # 6. Copy the compiled NestJS code from the builder stage
 COPY --from=builder /app/dist ./dist
 
+
 ENV NODE_ENV=production
 EXPOSE 8080
 
