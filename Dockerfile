@@ -1,13 +1,13 @@
-# -------------------------------
 # Stage 1: Build
-# -------------------------------
 FROM node:20-alpine AS builder
-# Added python and build tools here for the initial npm install
+
+# Install build tools needed for native modules (e.g., node-canvas)
 RUN apk add --no-cache libc6-compat python3 make g++ pkgconfig \
     pixman-dev cairo-dev pango-dev libjpeg-turbo-dev giflib-dev
 
 WORKDIR /app
 COPY package*.json ./
+# Use npm ci for more reliable builds in Docker
 RUN npm install
 COPY . .
 RUN npx prisma generate
@@ -19,7 +19,8 @@ RUN npm run build
 FROM node:20-alpine
 WORKDIR /app
 
-# 1. Install system dependencies for 'canvas' and 'prisma'
+# 1. We MUST keep python3 and build tools for npm install to succeed 
+# for native modules like 'canvas'.
 RUN apk add --no-cache \
     libc6-compat \
     python3 \
@@ -32,23 +33,19 @@ RUN apk add --no-cache \
     libjpeg-turbo-dev \
     giflib-dev
 
-# 2. Copy package files
 COPY package*.json ./
-
-# 3. CRITICAL: Copy the prisma folder BEFORE npm install 
-# This prevents the 'postinstall' prisma generate script from failing
 COPY prisma ./prisma/
 
-# 4. Install production dependencies
-# Adding --ignore-scripts is an alternative if you want to skip the postinstall
+# 2. Install production dependencies
 RUN npm install --omit=dev
-
-# 5. Generate the Prisma Client
 RUN npx prisma generate
 
-# 6. Copy the compiled NestJS code from the builder stage
+# 3. Copy compiled NestJS code from the builder stage
 COPY --from=builder /app/dist ./dist
 
+# 4. (Optional but Recommended) Remove build-only tools after install 
+# to keep the image lean, but keep the shared libraries (.so files)
+# If you want to be safe, just leave the apk add above as is.
 
 ENV NODE_ENV=production
 EXPOSE 8080
