@@ -46,15 +46,6 @@ export class CertificatesService {
 
             const pdfBuffer = canvas.toBuffer('image/png');
 
-            console.log('Buffer result:', pdfBuffer);
-            console.log('Is valid Buffer:', Buffer.isBuffer(pdfBuffer));
-
-            if (!pdfBuffer || !Buffer.isBuffer(pdfBuffer)) {
-                throw new InternalServerErrorException(
-                    'Canvas failed to generate a PDF buffer. This usually means Cairo/PDF support is missing on your system.'
-                );
-            }
-
             const fileName = `cert_${participantName.replace(/\s+/g, '_')}_${Date.now()}`;
             const uploadResult = await this.cloudinaryService.uploadCertificate(
                 pdfBuffer,
