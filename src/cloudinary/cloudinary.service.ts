@@ -23,14 +23,19 @@ export class CloudinaryService {
         return new Promise((resolve, reject) => {
 
             const upload = cloudinary.uploader.upload_stream({
-                resource_type : "raw",
+                resource_type : "image",
                 folder : folder,
                 public_id : fileName,
-                format : 'pdf',
+                format : 'png',
                 flags : 'attachment'
             },
             (error , result) => {
                 if(error) return reject(error);
+
+                if (!result) {
+                    return reject(new Error('Cloudinary upload failed: No result returned.'));
+                }
+                resolve(result);
             }
         );
 

@@ -25,7 +25,7 @@ export class CertificatesService {
             
             const templateUrl = this.getTemplateUrl(templateName);
             const response = await axios.get(templateUrl, {responseType : 'arraybuffer'});
-            const templateBuffer = Buffer.from(response.data , 'utf-8');
+            const templateBuffer = Buffer.from(response.data);
             const image = await loadImage(templateBuffer);
 
             //setup canvas
@@ -36,7 +36,7 @@ export class CertificatesService {
             ctx.drawImage(image, 0, 0 , image.width , image.height);
 
             //configuration
-            ctx.font = `${config.fontSize} ${config.fontFamily}`;
+            ctx.font = `${config.fontSize}px ${config.fontFamily}`;
             ctx.fillStyle = config.color;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
@@ -44,9 +44,18 @@ export class CertificatesService {
             //put participants name
             ctx.fillText(participantName , config.x , config.y);
 
-            const pdfBuffer = canvas.toBuffer('application/pdf');
+            const pdfBuffer = canvas.toBuffer('image/png');
 
-            const fileName = `cert_${participantName.replace(/\s+/g , '_')}-${Date.now()}`;
+            console.log('Buffer result:', pdfBuffer);
+            console.log('Is valid Buffer:', Buffer.isBuffer(pdfBuffer));
+
+            if (!pdfBuffer || !Buffer.isBuffer(pdfBuffer)) {
+                throw new InternalServerErrorException(
+                    'Canvas failed to generate a PDF buffer. This usually means Cairo/PDF support is missing on your system.'
+                );
+            }
+
+            const fileName = `cert_${participantName.replace(/\s+/g, '_')}_${Date.now()}`;
             const uploadResult = await this.cloudinaryService.uploadCertificate(
                 pdfBuffer,
                 'certificate_generates',

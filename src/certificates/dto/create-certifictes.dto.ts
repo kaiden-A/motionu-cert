@@ -10,7 +10,7 @@ interface Config{
 
 export class CreateCertificatesDto{
 
-    particpantName! : string;
+    participantName! : string;
     templateName! : string;
     config! : Config
     

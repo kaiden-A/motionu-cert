@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Users {
+  id            String          @id @default(uuid())
+  email         String          @unique
+  password_hash String
+  is_verified   Boolean
+  created_at    DateTime        @default(now())
+  updated_at    DateTime        @updatedAt
+  emailTemplate EmailTemplate[]
+  apiKeys       ApiKeys[]
+  emailLogs     EmailLogs[]
+
+  @@map("users")
+}
+
+model ApiKeys {
+  id         String   @id @default(uuid())
+  userId     String?
+  name       String?
+  revoked    Boolean  @default(false)
+  created_at DateTime @default(now())
+  apiKey     String   @unique
+  user       Users?   @relation(fields: [userId], references: [id])
+
+  @@map("api_keys")
+}
+
+model EmailTemplate {
+  id             String  @id
+  name           String
+  html           String
+  requiredFields Json
+  createdBy      String?
+  user           Users?  @relation(fields: [createdBy], references: [id])
+
+  @@map("email_template")
+}
+
+model EmailLogs {
+  id        String   @id @default(uuid())
+  userId    String?
+  fromEmail String
+  toEmail   String
+  subject   String
+  messageId String
+  status    Status?  @default(PENDING)
+  createdAt DateTime @default(now())
+  sentAt    DateTime @default(now())
+  user      Users?    @relation(fields: [userId], references: [id])
+
+  @@map("email_logs")
+}
+
+enum Status {
+  PENDING
+  SENT
+  FAILED
+}
