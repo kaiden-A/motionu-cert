@@ -1,0 +1,22 @@
+# Node modules (we install them inside Docker)
+node_modules
+npm-debug.log
+yarn-error.log
+.pnpm-store
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Prisma generated client will be handled in Docker
+node_modules/@prisma/client
+
+# Git files
+.git
+.gitignore
+
+# IDE/editor files
+.vscode
+.idea
+*.swp
