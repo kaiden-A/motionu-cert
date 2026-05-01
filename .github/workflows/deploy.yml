@@ -3,7 +3,7 @@ name: CD Pipeline
 on:
   push:
     branches:
-      - main
+      - master
 
 env:
   DOCKERHUB_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.APP_NAME }}
@@ -55,7 +55,3 @@ jobs:
           service: ${{ env.CLOUD_RUN_SERVICE }}
           region: ${{ env.GCP_REGION }}
           image: ${{ env.DOCKERHUB_IMAGE }}:${{ steps.tag.outputs.IMAGE_TAG }}
-
-      # 7. Print the deployed URL
-      - name: Show deployed URL
-        run: echo "Deployed to ${{ steps.deploy.outputs.url }}"
