@@ -11,7 +11,7 @@ on:
     
 
 env:
-  DOCKERHUB_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.APP_NAME }}
+  DOCKERHUB_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.DOCKER_NAME }}
   GCP_REGION: asia-southeast1
   CLOUD_RUN_SERVICE: ${{ vars.APP_NAME }}
 
